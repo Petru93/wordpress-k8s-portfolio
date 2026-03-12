@@ -1,4 +1,4 @@
-# wordpress-k8s-portfolio
+# wordpress-k8s-portfolio-tier_2
 
 wordpress-k8s-portfolio/
 ├── docker/
