@@ -2,7 +2,7 @@
 
 FROM debian:bookworm-slim AS builder
 
-ARG WORDPRESS_VERSION=6.5.3
+ARG WORDPRESS_VERSION=6.9.4
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	curl \
@@ -13,7 +13,7 @@ WORKDIR /build
 
 # Download Wordpress and verify checksum
 
-RUN curl --fsSL "https://wordpress.org/wordpress-${WORDPRESS_VERSION}.tar.gz" \
+RUN curl -fsSL "https://wordpress.org/wordpress-${WORDPRESS_VERSION}.tar.gz" \
 	-o wordpress.tar.gz \
 	&& curl -fsSL "https://wordpress.org/wordpress-${WORDPRESS_VERSION}.tar.gz.md5" \
     -o wordpress.tar.gz.md5 \
@@ -62,7 +62,11 @@ RUN addgroup -g 1001 wordpress \
     && adduser -u 1001 -G wordpress -s /bin/sh -D wordpress \
     && chown -R wordpress:wordpress /var/www/html \
     && chown -R wordpress:wordpress /var/log/nginx \
-    && chown -R wordpress:wordpress /var/lib/nginx
+    && chown -R wordpress:wordpress /var/lib/nginx \
+    && mkdir -p /run/nginx \
+    && chown -R wordpress:wordpress /run/nginx \
+    && touch /var/log/supervisord.log \
+    && chown wordpress:wordpress /var/log/supervisord.log
 
 WORKDIR /var/www/html
 
