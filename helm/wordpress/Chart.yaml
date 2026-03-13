@@ -1,0 +1,13 @@
+apiVersion: v2
+name: wordpress
+description: A production-grade WordPress deployment on Kubernetes
+type: application
+version: 0.1.0
+appVersion: "6.9.4"
+keywords:
+  - wordpress
+  - cms
+  - php
+maintainers:
+  - name: Petru93
+    url: https://github.com/Petru93

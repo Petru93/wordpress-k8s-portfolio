@@ -1,0 +1,86 @@
+# ============================================================
+# Global settings
+# ============================================================
+global:
+  namespace: wordpress
+
+# ============================================================
+# WordPress application
+# ============================================================
+wordpress:
+  image:
+    repository: ghcr.io/Petru93/wordpress-k8s-portfolio
+    tag: latest
+    pullPolicy: Always
+
+  replicaCount: 1
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  persistence:
+    enabled: true
+    storageClass: local-path
+    size: 5Gi
+    accessMode: ReadWriteOnce
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  ingress:
+    enabled: true
+    className: nginx
+    host: wordpress.local
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "64m"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+
+  env:
+    tablePrefix: wp_
+    debugMode: "false"
+
+# ============================================================
+# MySQL database
+# ============================================================
+mysql:
+  image:
+    repository: mysql
+    tag: "8.0"
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  persistence:
+    enabled: true
+    storageClass: local-path
+    size: 5Gi
+    accessMode: ReadWriteOnce
+
+  service:
+    port: 3306
+
+# ============================================================
+# Credentials — override these at install time, never commit
+# real values. Pass via --set or a secrets manager.
+# Example:
+#   helm install wp-release helm/wordpress 
+#     --set secrets.mysqlRootPassword=<your-password> 
+#     --set secrets.mysqlPassword=<your-password>
+# ============================================================
+secrets:
+  mysqlRootPassword: ""  # Required — pass via --set at install time
+  mysqlDatabase: "wordpress"
+  mysqlUser: "wp_user"
+  mysqlPassword: ""  # Required — pass via --set at install time

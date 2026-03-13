@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "wordpress.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "wordpress.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.wordpress.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "wordpress.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "wordpress.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: wordpress
+          image: "{{ .Values.wordpress.image.repository }}:{{ .Values.wordpress.image.tag }}"
+          imagePullPolicy: {{ .Values.wordpress.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: WORDPRESS_DB_HOST
+              value: "{{ include "wordpress.fullname" . }}-mysql:{{ .Values.mysql.service.port }}"
+            - name: WORDPRESS_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "wordpress.fullname" . }}-secrets
+                  key: mysql-database
+            - name: WORDPRESS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "wordpress.fullname" . }}-secrets
+                  key: mysql-user
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "wordpress.fullname" . }}-secrets
+                  key: mysql-password
+            - name: WORDPRESS_TABLE_PREFIX
+              value: {{ .Values.wordpress.env.tablePrefix }}
+            - name: WORDPRESS_DEBUG
+              value: {{ .Values.wordpress.env.debugMode | quote }}
+          resources:
+            {{- toYaml .Values.wordpress.resources | nindent 12 }}
+          volumeMounts:
+            - name: wordpress-data
+              mountPath: /var/www/html/wp-content
+          livenessProbe:
+            httpGet:
+              path: /wp-login.php
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /wp-login.php
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+      volumes:
+        - name: wordpress-data
+          {{- if .Values.wordpress.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "wordpress.fullname" . }}-wp-pvc
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
