@@ -13,6 +13,13 @@ pipeline {
         HELM_CHART_PATH = "helm/wordpress"
     }
 
+    // ============================================================
+    // Declare shared variables at pipeline level
+    // ============================================================
+    options {
+        disableConcurrentBuilds()
+    }
+
     stages {
 
         // --------------------------------------------------------
@@ -32,10 +39,16 @@ pipeline {
             steps {
                 script {
                     echo "Building image: ${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-                    dockerImage = docker.build(
-                        "${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}",
-                        "--file docker/Dockerfile ./docker"
-                    )
+                    // Push happens inside withRegistry so build here too
+                    docker.withRegistry(
+                        "https://${IMAGE_REGISTRY}",
+                        'ghcr-credentials'
+                    ) {
+                        dockerImage = docker.build(
+                            "${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}",
+                            "--file docker/Dockerfile ./docker"
+                        )
+                    }
                 }
             }
         }
@@ -120,7 +133,6 @@ pipeline {
             echo "Pipeline failed — check logs above"
         }
         always {
-            // Clean up local image to save disk space
             sh "docker rmi ${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} || true"
         }
     }
