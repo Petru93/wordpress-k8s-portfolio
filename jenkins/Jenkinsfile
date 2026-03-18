@@ -6,7 +6,7 @@ pipeline {
     // ============================================================
     environment {
         IMAGE_REGISTRY  = "ghcr.io"
-        IMAGE_NAME      = "Petru93/wordpress-k8s-portfolio"
+        IMAGE_NAME      = "petru93/wordpress-k8s-portfolio"
         IMAGE_TAG       = "${env.BUILD_NUMBER}"
         HELM_RELEASE    = "wp-release"
         HELM_NAMESPACE  = "wordpress"
