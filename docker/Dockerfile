@@ -25,6 +25,9 @@ RUN curl -fsSL "https://wordpress.org/wordpress-${WORDPRESS_VERSION}.tar.gz" \
 
 FROM php:8.2-fpm-alpine AS final
 
+# Upgrade all Alpine packages to patch known CVEs (e.g. CVE-2026-32767)
+RUN apk update && apk upgrade --no-cache
+
 # Install required PHP extensions and tools
 RUN apk add --no-cache \
     nginx \
