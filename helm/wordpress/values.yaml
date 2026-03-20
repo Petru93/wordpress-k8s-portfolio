@@ -12,7 +12,7 @@ wordpress:
     repository: ghcr.io/petru93/wordpress-k8s-portfolio
     tag: latest
     pullPolicy: Always
-  imagePullSecrets: [
+  imagePullSecrets: 
     - name: ghcr-pull-secret
   replicaCount: 1
 
