@@ -15,6 +15,14 @@ spec:
       labels:
         {{- include "wordpress.selectorLabels" . | nindent 8 }}
     spec:
+          # --------------------------------------------------------
+      # ADDED: GHCR pull secret for private image authentication
+      # --------------------------------------------------------
+      imagePullSecrets:
+        {{- range .Values.wordpress.imagePullSecrets }}
+        - name: {{ .name }}
+        {{- end }}
+      # --------------------------------------------------------
       containers:
         - name: wordpress
           image: "{{ .Values.wordpress.image.repository }}:{{ .Values.wordpress.image.tag }}"

@@ -9,10 +9,11 @@ global:
 # ============================================================
 wordpress:
   image:
-    repository: ghcr.io/Petru93/wordpress-k8s-portfolio
+    repository: ghcr.io/petru93/wordpress-k8s-portfolio
     tag: latest
     pullPolicy: Always
-
+  imagePullSecrets: [
+    - name: ghcr-pull-secret
   replicaCount: 1
 
   resources:
